@@ -1,0 +1,51 @@
+﻿Utilities utilities = new Utilities();
+            SEALContext context = utilities.SEALContext;
+            Ciphertext heightEncrypted = utilities.BuildCiphertextFromBase64String(bmrencodedData.Height, context);
+            Ciphertext weightEncrypted = utilities.BuildCiphertextFromBase64String(bmrencodedData.Weight, context);
+            Ciphertext ageEncrypted = utilities.BuildCiphertextFromBase64String(bmrencodedData.Age, context);
+            Ciphertext bmrResult = new Ciphertext();
+            Plaintext heightPlain = new Plaintext();
+            Plaintext weightPlain = new Plaintext();
+            Plaintext agePlain = new Plaintext();
+            Plaintext plaintext = new Plaintext();
+            Plaintext onetext=new Plaintext();
+            Ciphertext c=new Ciphertext();
+            Ciphertext oc=new Ciphertext();
+            double scale = Math.Pow(2.0, 40);
+            if (bmrencodedData.Gender.ToLower() == "male")
+            {
+                //BMR = 13.397W + 4.799H - 5.677A + 88.362
+                utilities.CKKSEncoder.Encode(13.397, scale, weightPlain);
+                utilities.CKKSEncoder.Encode(4.799, scale, heightPlain);
+                utilities.CKKSEncoder.Encode(5.677, scale, agePlain);
+                utilities.CKKSEncoder.Encode(88.362, scale, plaintext);
+                utilities.CKKSEncoder.Encode(1, scale, onetext);
+                utilities.Encryptor.Encrypt(plaintext, c);
+                utilities.Encryptor.Encrypt(onetext, oc);
+                utilities.Evaluator.MultiplyInplace(c, oc);
+                utilities.Evaluator.MultiplyPlainInplace(weightEncrypted, weightPlain);
+                utilities.Evaluator.MultiplyPlainInplace(heightEncrypted, heightPlain);
+                utilities.Evaluator.MultiplyPlainInplace(ageEncrypted, agePlain);
+                utilities.Evaluator.Add(weightEncrypted, heightEncrypted, bmrResult);
+                utilities.Evaluator.SubInplace(bmrResult, ageEncrypted);
+                utilities.Evaluator.Add(bmrResult,c,bmrResult);
+                bmrencodedData.BMRResult = utilities.CiphertextToBase64String(bmrResult);
+                return Ok(bmrencodedData);
+            }
+            else
+            {
+                //BMR = 9.247W + 3.098H - 4.330A + 447.593
+                utilities.CKKSEncoder.Encode(9.247, scale, weightPlain);
+                utilities.CKKSEncoder.Encode(3.098, scale, heightPlain);
+                utilities.CKKSEncoder.Encode(4.330, scale, agePlain);
+                utilities.CKKSEncoder.Encode(447.593, scale, plaintext);
+                utilities.Encryptor.Encrypt(plaintext, c);
+                utilities.Evaluator.MultiplyPlainInplace(weightEncrypted, weightPlain);
+                utilities.Evaluator.MultiplyPlainInplace(heightEncrypted, heightPlain);
+                utilities.Evaluator.MultiplyPlainInplace(ageEncrypted, agePlain);
+                utilities.Evaluator.Add(weightEncrypted, heightEncrypted, bmrResult);
+                utilities.Evaluator.SubInplace(bmrResult, ageEncrypted);
+                utilities.Evaluator.Add(bmrResult, c, bmrResult);
+                bmrencodedData.BMRResult = utilities.CiphertextToBase64String(bmrResult);
+                return Ok(bmrencodedData);
+            }

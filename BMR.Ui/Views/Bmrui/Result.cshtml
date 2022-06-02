@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "BMR Result";
+}
+<div class="col-sm-6 mx-auto mt-5 card">
+    <div class="card-header bg-dark text-white">
+        BMR Result
+    </div>
+    <div class="card-body">
+        <div class="row mt-2 mb-2">
+            <h1>BMR = </h1>@ViewBag.BMR <h2>Calories/day</h2>
+        </div>
+    </div>
+    <div class="card-footer">
+        <a class="btn btn-primary float-end" asp-action="Index" asp-controller="bmrui">Back To Calculator</a>
+    </div>
+</div>
